@@ -70,6 +70,7 @@ function _getRequest($input) {
             $operation['operation'] = "success"; // query สำเร็จ
 
             if ($data = $result->fetch(PDO::FETCH_ASSOC)) {
+                $operation["body"]['school_id'] = $data['school_id'];
                 $operation["body"]['school_edu_year'] = $data['school_edu_year'];
                 $operation["body"]['school_name'] = $data['school_name'];
                 $operation["body"]['school_address'] = $data['school_address'];
@@ -89,6 +90,7 @@ function _getRequest($input) {
 
             while ($data = $result->fetch(PDO::FETCH_ASSOC)) {
 
+                $operation["body"][$i]['school_id'] = $data['school_id'];
                 $operation["body"][$i]['school_edu_year'] = $data['school_edu_year'];
                 $operation["body"][$i]['school_name'] = $data['school_name'];
                 $operation["body"][$i]['school_addressschool_address'] = $data['school_address'];
@@ -104,7 +106,7 @@ function _getRequest($input) {
 
 /*
  * Function _postRequest
- * Purpose: ตรวจสอบกับฐานข้อมูลว่าเป็นสมาชิกหรือไม่
+ * Purpose: สร้างข้อมูลโรงเรียนใหม่
  */
 
 function _postRequest($input) {
@@ -115,48 +117,28 @@ function _postRequest($input) {
     $operation = array();
     $operation['operation'] = "fail";
 
-    $username_in = $input['username'];
-    $password_in = md5($input['password']);
-    $user_account_personal_code = $input['personal_id'];
-    $school_id_in = $input['school_id'];
-    $user_account_pre_name = $input['prename'];
-    $user_account_firstname = $input['firstname'];
-    $user_account_lastname = $input['lastname'];
-    $user_account_phone = $input['phone'];
-    $user_account_email = $input['email'];
-    $user_account_type = "coordinator_committee";
-    $user_account_edu_year = 2560;
-    $user_account_position = $input[''];
+    $school_name = $input['school_name'];
+    $school_address = $input['school_address'];
+    $school_district = $input['school_district'];
+    $school_city = $input['school_city'];
+    $school_postcode = $input['school_postcode'];
+
 
     /*
      * เตรียม SQL เพื่อสร้างบัญชีผู้ใช้ใหม่
      */
-    $sql = "insert into user_account("
-            . "user_account_username, "
-            . "user_account_password, "
-            . "user_account_type, "
-            . "user_account_personal_code, "
-            . "user_account_edu_year, "
-            . "user_account_pre_name, "
-            . "user_account_firstname, "
-            . "user_account_lastname, "
-            . "user_account_phone, "
-            . "user_account_email, "
-            . "school_id,"
-            . "user_account_position"
+    $sql = "insert into school("
+            . "school_name, "
+            . "school_address, "
+            . "school_district, "
+            . "school_city, "
+            . "school_postcode "
             . ") values("
-            . "'$username_in', "
-            . "'$password_in', "
-            . "'$user_account_type', "
-            . "'$user_account_personal_code', "
-            . "'$user_account_edu_year', "
-            . "'$user_account_pre_name', "
-            . "'$user_account_firstname', "
-            . "'$user_account_lastname', "
-            . "'$user_account_phone', "
-            . "'$user_account_email', "
-            . "'$school_id_in', "
-            . "''"
+            . "'$school_name', "
+            . "'$school_address', "
+            . "'$school_district', "
+            . "'$school_city', "
+            . "'$school_postcode' "
             . ")";
 
     /*
@@ -164,7 +146,7 @@ function _postRequest($input) {
      */
     if ($result = $conn->query($sql)) {
         $operation['operation'] = "success";
-        $operation['body'] = $sql;
+        $operation['body'] = '';
     }
     echo json_encode($operation);
 }
@@ -184,34 +166,23 @@ function _putRequest() {
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
 
-        $username_in = $input['username'];
-        $password_in = md5($input['password']);
-        $user_account_personal_code = $input['personal_id'];
-        $school_id_in = $input['school_id'];
-        $user_account_pre_name = $input['prename'];
-        $user_account_firstname = $input['firstname'];
-        $user_account_lastname = $input['lastname'];
-        $user_account_phone = $input['phone'];
-        $user_account_email = $input['email'];
-        $user_account_type = "coordinator_committee";
-        $user_account_edu_year = 2560;
-        $user_account_position = $input[''];
-        
-        $user_id = $input['id'];
+        $school_name = $input['school_name'];
+        $school_address = $input['school_address'];
+        $school_district = $input['school_district'];
+        $school_city = $input['school_city'];
+        $school_postcode = $input['school_postcode'];
+        $school_id = $input['id'];
 
         /*
          * เตรียม SQL เพื่อแก้ไขข้อมูลบัญชีผู้ใช้
          */
-        $sql = "update user_account set "
-                . "user_account_username = '$username_in', "
-                . "user_account_password = '$password_in', "
-                . "user_account_pre_name = '$user_account_pre_name', "
-                . "user_account_firstname = '$user_account_firstname', "
-                . "user_account_lastname = '$user_account_lastname', "
-                . "user_account_phone = '$user_account_phone', "
-                . "user_account_email = '$user_account_email', "
-                . "school_id = '$school_id_in' "
-                . "where user_account_id = $user_id";
+        $sql = "update school set "
+                . "school_name = '$school_name', "
+                . "school_address = '$school_address', "
+                . "school_district = '$school_district', "
+                . "school_city = '$school_city', "
+                . "school_postcode = '$school_postcode' "
+                . "where school_id = $school_id";
 
         /*
          * Operate คำสั่งลงฐานข้อมูล
@@ -240,12 +211,11 @@ function _deleteRequest() {
     $operation = array();
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
-
         /*
          * เตรียม SQL เพื่อแก้ไขข้อมูลบัญชีผู้ใช้
          */
         $user_id = $input['id'];
-        $sql = "delete from user_account where user_account_id = $user_id";
+        $sql = "delete from school where school_id = $user_id";
 
         /*
          * Operate คำสั่งลงฐานข้อมูล
