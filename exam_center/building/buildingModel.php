@@ -6,7 +6,7 @@ error_reporting(0);
  * Developer: Mr.Wanchalerm  Junsong (wanchalerm.dev@gmail.com)
  * Since: 2017 September 17
  * Page: User Account Management
- * Discript: โมเดลที่รับค่าจากฝั่ง Client เพื่อจัดการ เพิ่ม แก้ไข ลบ ศูนย์สอบ
+ * Discript: โมเดลที่รับค่าจากฝั่ง Client จัดการข้อมูลเกี่ยวกับอาคารสอบของแต่ละศูนย์สอบ
  */
 
 /*
@@ -46,7 +46,7 @@ function _pageNotFound() {
 
 /*
  * Function _getRequest
- * Purpose: ใช้สำหรับคืนค่าของข้อมูลผู้ใช้
+ * Purpose: ใช้สำหรับค้นหาข้อมูลอาคารเรียน
  */
 
 function _getRequest($input) {
@@ -56,33 +56,30 @@ function _getRequest($input) {
     global $conn;
     $operation = array();
     $operation['operation'] = "fail";
+    
     /*
      * ตรวจสอบว่ามีตัวแปรจาก Method GET หรือไม่
      */
     if (isset($input['id'])) {
-        // มี ID คือการ select รายโรงเรียน
+        // มี ID คือการ select รายอาคาร
 
-        $schoolId = $_GET['id'];
+        $building_id = $_GET['id'];
 
-        $sql = "select * from school where school_id = $schoolId";
+        $sql = "select * from building where building_id = $building_id";
 
         if ($result = $conn->query($sql)) {
 
             $operation['operation'] = "success"; // query สำเร็จ
 
             if ($data = $result->fetch(PDO::FETCH_ASSOC)) {
+                $operation["body"]['building_id'] = $data['building_id'];
+                $operation["body"]['building_name'] = $data['building_name'];
                 $operation["body"]['school_id'] = $data['school_id'];
-                $operation["body"]['school_edu_year'] = $data['school_edu_year'];
-                $operation["body"]['school_name'] = $data['school_name'];
-                $operation["body"]['school_address'] = $data['school_address'];
-                $operation["body"]['school_district'] = $data['school_district'];
-                $operation["body"]['school_city'] = $data['school_city'];
-                $operation["body"]['school_postcode'] = $data['school_postcode'];
             }
         }
     } else {
         // ไม่มี ID คือการ select ทั้งหมด
-        $sql = "select * from school order by school_id asc";
+        $sql = "select * from building order by school_id asc";
         $i = 1;
 
         if ($result = $conn->query($sql)) {
@@ -91,13 +88,9 @@ function _getRequest($input) {
 
             while ($data = $result->fetch(PDO::FETCH_ASSOC)) {
 
+                $operation["body"][$i]['building_id'] = $data['building_id'];
+                $operation["body"][$i]['building_name'] = $data['building_name'];
                 $operation["body"][$i]['school_id'] = $data['school_id'];
-                $operation["body"][$i]['school_edu_year'] = $data['school_edu_year'];
-                $operation["body"][$i]['school_name'] = $data['school_name'];
-                $operation["body"][$i]['school_addressschool_address'] = $data['school_address'];
-                $operation["body"][$i]['school_district'] = $data['school_district'];
-                $operation["body"][$i]['school_city'] = $data['school_city'];
-                $operation["body"][$i]['school_postcode'] = $data['school_postcode'];
                 $i++;
             }
         }
@@ -107,7 +100,7 @@ function _getRequest($input) {
 
 /*
  * Function _postRequest
- * Purpose: สร้างข้อมูลโรงเรียนใหม่
+ * Purpose: สร้างข้อมูลอาคารใหม่
  */
 
 function _postRequest($input) {
@@ -118,28 +111,22 @@ function _postRequest($input) {
     $operation = array();
     $operation['operation'] = "fail";
 
-    $school_name = $input['school_name'];
-    $school_address = $input['school_address'];
-    $school_district = $input['school_district'];
-    $school_city = $input['school_city'];
-    $school_postcode = $input['school_postcode'];
+    $building_id = $input['building_id'];
+    $building_name = $input['building_name'];
+    $school_id = $input['school_id'];
 
 
     /*
-     * เตรียม SQL เพื่อสร้างบัญชีผู้ใช้ใหม่
+     * เตรียม SQL เพื่อเพิ่มข้อมูลอาคารใหม่
      */
-    $sql = "insert into school("
-            . "school_name, "
-            . "school_address, "
-            . "school_district, "
-            . "school_city, "
-            . "school_postcode "
+    $sql = "insert into building("
+            . "building_id, "
+            . "building_name, "
+            . "school_id "
             . ") values("
-            . "'$school_name', "
-            . "'$school_address', "
-            . "'$school_district', "
-            . "'$school_city', "
-            . "'$school_postcode' "
+            . "'$building_id', "
+            . "'$building_name', "
+            . "'$school_id' "
             . ")";
 
     /*
@@ -154,7 +141,7 @@ function _postRequest($input) {
 
 /*
  * Function _getRequest
- * Purpose: ไม่ใช้งาน
+ * Purpose: แก้ไขข้อมูลอาคารเรียน
  */
 
 function _putRequest() {
@@ -167,22 +154,16 @@ function _putRequest() {
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
 
-        $school_name = $input['school_name'];
-        $school_address = $input['school_address'];
-        $school_district = $input['school_district'];
-        $school_city = $input['school_city'];
-        $school_postcode = $input['school_postcode'];
-        $school_id = $input['id'];
+        $building_id = $input['id'];
+        $building_name = $input['building_name'];
+        $school_id = $input['school_id'];
 
         /*
-         * เตรียม SQL เพื่อแก้ไขข้อมูลบัญชีผู้ใช้
+         * เตรียม SQL เพื่อแก้ไขข้ออาคาร
          */
-        $sql = "update school set "
-                . "school_name = '$school_name', "
-                . "school_address = '$school_address', "
-                . "school_district = '$school_district', "
-                . "school_city = '$school_city', "
-                . "school_postcode = '$school_postcode' "
+        $sql = "update building set "
+                . "building_name = '$building_name', "
+                . "school_id = '$school_id' "
                 . "where school_id = $school_id";
 
         /*
@@ -199,7 +180,7 @@ function _putRequest() {
 
 /*
  * Function _getRequest
- * Purpose: เพื่อใช้ลบบัญชีผู้ใช้ออกจากฐานข้อมูล
+ * Purpose: เพื่อใช้ลบข้อมูลอาคาร
  */
 
 function _deleteRequest() {
@@ -213,10 +194,10 @@ function _deleteRequest() {
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
         /*
-         * เตรียม SQL เพื่อแก้ไขข้อมูลบัญชีผู้ใช้
+         * เตรียม SQL เพื่อลบข้อมูลอาคาร
          */
-        $user_id = $input['id'];
-        $sql = "delete from school where school_id = $user_id";
+        $building_id = $input['id'];
+        $sql = "delete from building where building_id = $building_id";
 
         /*
          * Operate คำสั่งลงฐานข้อมูล

@@ -1,6 +1,7 @@
 <?php
 
 session_abort();
+error_reporting(0);
 /*
  * Developer: Mr.Wanchalerm  Junsong (wanchalerm.dev@gmail.com)
  * Since: 2017 September 15
