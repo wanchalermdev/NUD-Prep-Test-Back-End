@@ -131,7 +131,6 @@ function _postRequest($input) {
     $user_account_email = $input['email'];
     $user_account_type = "coordinator_committee";
     $user_account_edu_year = 2560;
-    $user_account_position = $input[''];
 
     /*
      * เตรียม SQL เพื่อสร้างบัญชีผู้ใช้ใหม่
