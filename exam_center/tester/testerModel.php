@@ -65,30 +65,34 @@ function _getRequest($input) {
     /*
      * ตรวจสอบว่ามีตัวแปรจาก Method GET หรือไม่
      */
-    if ((isset($input['id'])) && (isset($input['school_id']))) {
+    if (isset($input['id'])) {
         // มี ID คือการ select รายห้อง
 
-        $exam_room_id = $_GET['id'];
+        $tester_id = $_GET['id'];
         
 
-        $sql = "select * from exam_room; where exam_room_id = $exam_room_id and school_id = '$school_id'";
+        $sql = "select * from tester where tester_id = $tester_id and school_id = '$school_id'";
 
         if ($result = $conn->query($sql)) {
 
             $operation['operation'] = "success"; // query สำเร็จ
 
             if ($data = $result->fetch(PDO::FETCH_ASSOC)) {
-                $operation["body"]['exam_room_id'] = $data['exam_room_id'];
-                $operation["body"]['exam_room_name'] = $data['exam_room_name'];
-                $operation["body"]['exam_room_capacity'] = $data['exam_room_capacity'];
-                $operation["body"]['exam_room_committee1'] = $data['exam_room_committee1'];
-                $operation["body"]['exam_room_committee2'] = $data['exam_room_committee2'];
-                $operation["body"]['building_id'] = $data['building_id'];
+                $operation["body"]['tester_id'] = $data['tester_id'];
+                $operation["body"]['tester_personal_code'] = $data['tester_personal_code'];
+                $operation["body"]['tester_prename'] = $data['tester_prename'];
+                $operation["body"]['tester_firstname'] = $data['tester_firstname'];
+                $operation["body"]['tester_firstname'] = $data['tester_firstname'];
+                $operation["body"]['tester_lastname'] = $data['tester_lastname'];
+                $operation["body"]['school_id'] = $data['school_id'];
+                $operation["body"]['tester_phone'] = $data['tester_phone'];
+                $operation["body"]['tester_type'] = $data['tester_type'];
+                $operation["body"]['tester_level'] = $data['tester_level'];
             }
         }
     } else {
         // ไม่มี ID คือการ select ทั้งหมด
-        $sql = "select * from exam_room inner join school, building where school.school_id = $school_id and building.building_id like exam_room.building_id and building.school_id = school.school_id order by building.building_id, exam_room.exam_room_id asc";
+        $sql = "select * from tester inner join school where school.school_id = $school_id and tester.school_id = school.school_id order by tester.tester_id asc";
         $i = 1;
 
         if ($result = $conn->query($sql)) {
@@ -96,13 +100,16 @@ function _getRequest($input) {
             $operation['operation'] = "success";  // query สำเร็จ
 
             while ($data = $result->fetch(PDO::FETCH_ASSOC)) {
-
-                $operation["body"][$i]['exam_room_id'] = $data['exam_room_id'];
-                $operation["body"][$i]['exam_room_name'] = $data['exam_room_name'];
-                $operation["body"][$i]['exam_room_capacity'] = $data['exam_room_capacity'];
-                $operation["body"][$i]['exam_room_committee1'] = $data['exam_room_committee1'];
-                $operation["body"][$i]['exam_room_committee2'] = $data['exam_room_committee2'];
-                $operation["body"][$i]['building_id'] = $data['building_id'];
+                $operation["body"][$i]['tester_id'] = $data['tester_id'];
+                $operation["body"][$i]['tester_personal_code'] = $data['tester_personal_code'];
+                $operation["body"][$i]['tester_prename'] = $data['tester_prename'];
+                $operation["body"][$i]['tester_firstname'] = $data['tester_firstname'];
+                $operation["body"][$i]['tester_firstname'] = $data['tester_firstname'];
+                $operation["body"][$i]['tester_lastname'] = $data['tester_lastname'];
+                $operation["body"][$i]['school_id'] = $data['school_id'];
+                $operation["body"][$i]['tester_phone'] = $data['tester_phone'];
+                $operation["body"][$i]['tester_type'] = $data['tester_type'];
+                $operation["body"][$i]['tester_level'] = $data['tester_level'];
                 $i++;
             }
         }
@@ -123,29 +130,38 @@ function _postRequest($input) {
     $operation = array();
     $operation['operation'] = "fail";
 
-    $exam_room_name = $input['exam_room_name'];
-    $exam_room_capacity = $input['exam_room_capacity'];
-    $exam_room_committee1 = $input['exam_room_committee1'];
-    $exam_room_committee2 = $input['exam_room_committee2'];
-    $building_id = $input['building_id'];
-
+    $tester_personal_code = $input['tester_personal_code'];
+    $tester_prensme = $input['tester_prensme'];
+    $tester_firstname = $input['tester_firstname'];
+    $tester_lastname = $input['tester_lastname'];
+    $tester_phone = $input['tester_phone'];
+    $tester_type = $input['tester_type'];
+    $tester_level = $input['tester_level'];
+    
+    $school_id = $input['school_id'];
 
     /*
      * เตรียม SQL เพื่อเพิ่มข้อมูลอาคารใหม่
      */
     
-    $sql = "insert into exam_room ("
-            . "exam_room_name, "
-            . "exam_room_capacity, "
-            . "exam_room_committee1, "
-            . "exam_room_committee2, "
-            . "building_id "
+    $sql = "insert into tester ("
+            . "tester_personal_code, "
+            . "tester_prename, "
+            . "tester_firstname, "
+            . "tester_lastname, "
+            . "tester_phone, "
+            . "tester_type, "
+            . "tester_level, "
+            . "school_id "
             . ") values("
-            . "'$exam_room_name', "
-            . "'$exam_room_capacity', "
-            . "'$exam_room_committee1', "
-            . "'$exam_room_committee2', "
-            . "'$building_id' "
+            . "'$tester_personal_code', "
+            . "'$tester_prensme', "
+            . "'$tester_firstname', "
+            . "'$tester_lastname', "
+            . "'$tester_phone', "
+            . "'$tester_type', "
+            . "'$tester_level', "
+            . "'$school_id' "
             . ")";
     /*
      * Operate คำสั่งลงฐานข้อมูล
@@ -173,23 +189,23 @@ function _putRequest() {
     $operation = array();
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
-        $exam_room_id = $input['id'];
-        $exam_room_name = $input['exam_room_name'];
-        $exam_room_capacity = $input['exam_room_capacity'];
-        $exam_room_committee1 = $input['exam_room_committee1'];
-        $exam_room_committee2 = $input['exam_room_committee2'];
+        $tester_id = $input['id'];
+        $tester_name = $input['tester_name'];
+        $tester_capacity = $input['tester_capacity'];
+        $tester_committee1 = $input['tester_committee1'];
+        $tester_committee2 = $input['tester_committee2'];
         $building_id = $input['building_id'];
 
         /*
          * เตรียม SQL เพื่อแก้ไขข้ออาคาร
          */
         $sql = "update building set "
-                . "exam_room_name = '$building_name', "
-                . "exam_room_capacity = '$exam_room_capacity', "
-                . "exam_room_committee1 = '$exam_room_committee1', "
-                . "exam_room_committee2 = '$exam_room_committee2', "
+                . "tester_name = '$building_name', "
+                . "tester_capacity = '$tester_capacity', "
+                . "tester_committee1 = '$tester_committee1', "
+                . "tester_committee2 = '$tester_committee2', "
                 . "building_id = '$building_id' "
-                . "where exam_room_id = $exam_room_id";
+                . "where tester_id = $tester_id";
 
         /*
          * Operate คำสั่งลงฐานข้อมูล
@@ -221,8 +237,8 @@ function _deleteRequest() {
         /*
          * เตรียม SQL เพื่อลบข้อมูลอาคาร
          */
-        $exam_room_id = $input['id'];
-        $sql = "delete from exam_room where exam_room_id = $building_id";
+        $tester_id = $input['id'];
+        $sql = "delete from tester where tester_id = $building_id";
 
         /*
          * Operate คำสั่งลงฐานข้อมูล

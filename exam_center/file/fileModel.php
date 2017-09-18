@@ -65,7 +65,7 @@ function _getRequest($input) {
     /*
      * ตรวจสอบว่ามีตัวแปรจาก Method GET หรือไม่
      */
-    if ((isset($input['id'])) && (isset($input['school_id']))) {
+    if (isset($input['id'])) {
         // มี ID คือการ select รายห้อง
 
         $exam_room_id = $_GET['id'];
