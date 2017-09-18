@@ -12,7 +12,7 @@ error_reporting(0);
 /*
  * initial model
  */
-include_once '../INITIAL_MODEL.php';
+require_once '../../DATABASE_CONNECTION.php';
 
 /*
  * HEADER
@@ -56,7 +56,7 @@ function _getRequest($input) {
     global $conn;
     $operation = array();
     $operation['operation'] = "fail";
-    
+
     /*
      * ตรวจสอบว่ามีตัวแปรจาก Method GET หรือไม่
      */
@@ -111,7 +111,6 @@ function _postRequest($input) {
     $operation = array();
     $operation['operation'] = "fail";
 
-    $building_id = $input['building_id'];
     $building_name = $input['building_name'];
     $school_id = $input['school_id'];
 
@@ -120,22 +119,21 @@ function _postRequest($input) {
      * เตรียม SQL เพื่อเพิ่มข้อมูลอาคารใหม่
      */
     $sql = "insert into building("
-            . "building_id, "
             . "building_name, "
             . "school_id "
             . ") values("
-            . "'$building_id', "
             . "'$building_name', "
             . "'$school_id' "
             . ")";
-
     /*
      * Operate คำสั่งลงฐานข้อมูล
      */
-    if ($result = $conn->query($sql)) {
+    if ($result = $conn->prepare($sql)) {        
+        $result->execute();
         $operation['operation'] = "success";
         $operation['body'] = '';
     }
+    
     echo json_encode($operation);
 }
 
@@ -153,18 +151,15 @@ function _putRequest() {
     $operation = array();
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
-
         $building_id = $input['id'];
         $building_name = $input['building_name'];
-        $school_id = $input['school_id'];
 
         /*
          * เตรียม SQL เพื่อแก้ไขข้ออาคาร
          */
         $sql = "update building set "
-                . "building_name = '$building_name', "
-                . "school_id = '$school_id' "
-                . "where school_id = $school_id";
+                . "building_name = '$building_name' "
+                . "where building_id = $building_id";
 
         /*
          * Operate คำสั่งลงฐานข้อมูล
@@ -209,6 +204,7 @@ function _deleteRequest() {
         }
     }
     echo json_encode($operation);
+    
 }
 
 ?>
