@@ -56,11 +56,16 @@ function _getRequest($input) {
     global $conn;
     $operation = array();
     $operation['operation'] = "fail";
+    $school_id = '';
+    if(isset($input['school_id'])){
+        //echo "yes you have a school_id is " . $input['school_id'];
+        $school_id = $input['school_id'];
+    }
 
     /*
      * ตรวจสอบว่ามีตัวแปรจาก Method GET หรือไม่
      */
-    if (isset($input['id'])) {
+    if ((isset($input['id'])) && (isset($input['school_id']))) {
         // มี ID คือการ select รายอาคาร
 
         $building_id = $_GET['id'];
@@ -79,7 +84,7 @@ function _getRequest($input) {
         }
     } else {
         // ไม่มี ID คือการ select ทั้งหมด
-        $sql = "select * from building order by school_id asc";
+        $sql = "select * from building where school_id = '$school_id' order by school_id asc";
         $i = 1;
 
         if ($result = $conn->query($sql)) {

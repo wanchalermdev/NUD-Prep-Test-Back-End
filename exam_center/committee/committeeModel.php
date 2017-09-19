@@ -168,28 +168,24 @@ function _putRequest() {
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
         $committee_id = $input['id'];
-        $committee_name = $input['committee_name'];
-        $committee_capacity = $input['committee_capacity'];
-        $committee_committee1 = $input['committee_committee1'];
-        $committee_committee2 = $input['committee_committee2'];
-        $building_id = $input['building_id'];
+        $committee_prename = $input['committee_prename'];
+        $committee_firstname = $input['committee_firstname'];
+        $committee_lastname = $input['committee_lastname'];
+        $school_id = $input['school_id'];
 
         /*
          * เตรียม SQL เพื่อแก้ไขข้อมูลกรรมการ
          */
-        $sql = "update building set "
-                . "committee_name = '$building_name', "
-                . "committee_capacity = '$committee_capacity', "
-                . "committee_committee1 = '$committee_committee1', "
-                . "committee_committee2 = '$committee_committee2', "
-                . "building_id = '$building_id' "
+        $sql = "update committee set "
+                . "committee_prename = '$committee_prename', "
+                . "committee_firstname = '$committee_firstname', "
+                . "committee_lastname = '$committee_lastname', "
+                . "school_id = '$school_id' "
                 . "where committee_id = $committee_id";
-
         /*
          * Operate คำสั่งลงฐานข้อมูล
          */
-        if ($result = $conn->prepare($sql)) {
-            $result->execute();
+        if ($result = $conn->query($sql)) {
             $operation['operation'] = "success";
             $operation['body'] = '';
         }

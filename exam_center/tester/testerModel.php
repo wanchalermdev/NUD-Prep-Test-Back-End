@@ -57,7 +57,7 @@ function _getRequest($input) {
     $operation = array();
     $operation['operation'] = "fail";
     $school_id = '';
-    if(isset($input['school_id'])){
+    if (isset($input['school_id'])) {
         //echo "yes you have a school_id is " . $input['school_id'];
         $school_id = $input['school_id'];
     }
@@ -69,7 +69,7 @@ function _getRequest($input) {
         // มี ID คือการ select รายห้อง
 
         $tester_id = $_GET['id'];
-        
+
 
         $sql = "select * from tester where tester_id = $tester_id and school_id = '$school_id'";
 
@@ -137,13 +137,13 @@ function _postRequest($input) {
     $tester_phone = $input['tester_phone'];
     $tester_type = $input['tester_type'];
     $tester_level = $input['tester_level'];
-    
+
     $school_id = $input['school_id'];
 
     /*
      * เตรียม SQL เพื่อเพิ่มข้อมูลอาคารใหม่
      */
-    
+
     $sql = "insert into tester ("
             . "tester_personal_code, "
             . "tester_prename, "
@@ -189,24 +189,30 @@ function _putRequest() {
     $operation = array();
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
+        
         $tester_id = $input['id'];
-        $tester_name = $input['tester_name'];
-        $tester_capacity = $input['tester_capacity'];
-        $tester_committee1 = $input['tester_committee1'];
-        $tester_committee2 = $input['tester_committee2'];
-        $building_id = $input['building_id'];
-
+        $tester_personal_code = $input['tester_personal_code'];
+        $tester_prename = $input['tester_prename'];
+        $tester_firstname = $input['tester_firstname'];
+        $tester_lastname = $input['tester_lastname'];
+        $tester_phone = $input['tester_phone'];
+        $tester_type = $input['tester_type'];
+        $tester_level = $input['tester_level'];
+        $school_id = $input['school_id'];
+        
         /*
          * เตรียม SQL เพื่อแก้ไขข้ออาคาร
          */
-        $sql = "update building set "
-                . "tester_name = '$building_name', "
-                . "tester_capacity = '$tester_capacity', "
-                . "tester_committee1 = '$tester_committee1', "
-                . "tester_committee2 = '$tester_committee2', "
-                . "building_id = '$building_id' "
+        $sql = "update tester set "
+                . "tester_personal_code = '$tester_personal_code', "
+                . "tester_prename = '$tester_prename', "
+                . "tester_firstname = '$tester_firstname', "
+                . "tester_lastname = '$tester_lastname', "
+                . "tester_phone = '$tester_phone', "
+                . "tester_type = '$tester_type', "
+                . "tester_level = '$tester_level', "
+                . "school_id = '$school_id' "
                 . "where tester_id = $tester_id";
-
         /*
          * Operate คำสั่งลงฐานข้อมูล
          */
@@ -238,7 +244,7 @@ function _deleteRequest() {
          * เตรียม SQL เพื่อลบข้อมูลอาคาร
          */
         $tester_id = $input['id'];
-        $sql = "delete from tester where tester_id = $building_id";
+        $sql = "delete from tester where tester_id = $tester_id";
 
         /*
          * Operate คำสั่งลงฐานข้อมูล

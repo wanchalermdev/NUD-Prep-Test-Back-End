@@ -71,8 +71,10 @@ function _getRequest($input) {
         $exam_room_id = $_GET['id'];
         
 
-        $sql = "select * from exam_room; where exam_room_id = $exam_room_id and school_id = '$school_id'";
-
+        //$sql = "select * from exam_room inner join building where exam_room.exam_room_id =  and building.school_id = '' and exam_room.building_id = building.school_id";
+        $sql = "select * from exam_room inner join building where exam_room.building_id = building.building_id and building.school_id = '$school_id' and exam_room.exam_room_id = $exam_room_id";
+        //echo $sql;
+        
         if ($result = $conn->query($sql)) {
 
             $operation['operation'] = "success"; // query สำเร็จ
@@ -90,7 +92,6 @@ function _getRequest($input) {
         // ไม่มี ID คือการ select ทั้งหมด
         $sql = "select * from exam_room inner join school, building where school.school_id = $school_id and building.building_id like exam_room.building_id and building.school_id = school.school_id order by building.building_id, exam_room.exam_room_id asc";
         $i = 1;
-
         if ($result = $conn->query($sql)) {
 
             $operation['operation'] = "success";  // query สำเร็จ
@@ -183,19 +184,17 @@ function _putRequest() {
         /*
          * เตรียม SQL เพื่อแก้ไขข้ออาคาร
          */
-        $sql = "update building set "
-                . "exam_room_name = '$building_name', "
+        $sql = "update exam_room set "
+                . "exam_room_name = '$exam_room_name', "
                 . "exam_room_capacity = '$exam_room_capacity', "
                 . "exam_room_committee1 = '$exam_room_committee1', "
                 . "exam_room_committee2 = '$exam_room_committee2', "
                 . "building_id = '$building_id' "
                 . "where exam_room_id = $exam_room_id";
-
         /*
          * Operate คำสั่งลงฐานข้อมูล
          */
-        if ($result = $conn->prepare($sql)) {
-            $result->execute();
+        if ($result = $conn->query($sql)) {
             $operation['operation'] = "success";
             $operation['body'] = '';
         }
@@ -222,7 +221,7 @@ function _deleteRequest() {
          * เตรียม SQL เพื่อลบข้อมูลอาคาร
          */
         $exam_room_id = $input['id'];
-        $sql = "delete from exam_room where exam_room_id = $building_id";
+        $sql = "delete from exam_room where exam_room_id = $exam_room_id";
 
         /*
          * Operate คำสั่งลงฐานข้อมูล
