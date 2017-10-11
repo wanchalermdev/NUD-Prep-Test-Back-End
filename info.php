@@ -1,13 +1,16 @@
 <?php
-
-session_abort();
-error_reporting(0);
 /*
  * Developer: Mr.Wanchalerm  Junsong (wanchalerm.dev@gmail.com)
  * Since: 2017 September 17
- * Page: User Account Management
- * Discript: โมเดลที่รับค่าจากฝั่ง Client จัดการข้อมูลเกี่ยวกับกรรมการ
+ * Page: Info All The System
+ * Discript: ส่วนจัดการสารสนเทศของระบบ
  */
+session_abort();
+error_reporting(0);
+include_once './DATABASE_CONNECTION.php';
+include_once './exam_center/examCenterInfo.php';
+
+
 
 /*
  * initial model
@@ -21,6 +24,10 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+/*
+ * Check Method Receives
+ */
 if ($_SERVER['REQUEST_METHOD'] === "GET") {
     _getRequest($_GET);
 } elseif ($_SERVER['REQUEST_METHOD'] === "POST") {
@@ -38,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === "GET") {
  * Purpose: เพื่อใช้ return ค่าว่าไม่มีหน้าเพจนี้อยู่ในระบบ
  * Param: none
  */
-
 function _pageNotFound() {
     http_response_code(404); // แสดงหน้าไม่พบหน้าเว็บ
     die(); // ปิดการเชื่อมต่อ
@@ -46,9 +52,8 @@ function _pageNotFound() {
 
 /*
  * Function _getRequest
- * Purpose: ใช้สำหรับค้นหาข้อมูลกรรมการ
+ * Purpose: ใช้สำหรับค้นหาข้อมูลห้องเรียน
  */
-
 function _getRequest($input) {
     /*
      * เตรียมตัวแปร
@@ -68,39 +73,42 @@ function _getRequest($input) {
     if ((isset($input['id'])) && (isset($input['school_id']))) {
         // มี ID คือการ select รายห้อง
 
-        $committee_id = $_GET['id'];
+        $exam_room_id = $_GET['id'];
         
 
-        $sql = "select * from committee where committee_id = $committee_id and school_id = '$school_id'";
-
+        //$sql = "select * from exam_room inner join building where exam_room.exam_room_id =  and building.school_id = '' and exam_room.building_id = building.school_id";
+        $sql = "select * from exam_room inner join building where exam_room.building_id = building.building_id and building.school_id = '$school_id' and exam_room.exam_room_id = $exam_room_id";
+        //echo $sql;
+        
         if ($result = $conn->query($sql)) {
 
             $operation['operation'] = "success"; // query สำเร็จ
 
             if ($data = $result->fetch(PDO::FETCH_ASSOC)) {
-                $operation["body"]['committee_id'] = $data['committee_id'];
-                $operation["body"]['committee_prename'] = $data['committee_prename'];
-                $operation["body"]['committee_firstname'] = $data['committee_firstname'];
-                $operation["body"]['committee_lastname'] = $data['committee_lastname'];
-                $operation["body"]['school_id'] = $data['school_id'];
+                $operation["body"]['exam_room_id'] = $data['exam_room_id'];
+                $operation["body"]['exam_room_name'] = $data['exam_room_name'];
+                $operation["body"]['exam_room_capacity'] = $data['exam_room_capacity'];
+                $operation["body"]['exam_room_committee1'] = $data['exam_room_committee1'];
+                $operation["body"]['exam_room_committee2'] = $data['exam_room_committee2'];
+                $operation["body"]['building_id'] = $data['building_id'];
             }
         }
     } else {
         // ไม่มี ID คือการ select ทั้งหมด
-        $sql = "select * from committee inner join school where school.school_id = $school_id and committee.school_id = school.school_id order by committee_id asc";
+        $sql = "select * from exam_room inner join school, building where school.school_id = $school_id and building.building_id like exam_room.building_id and building.school_id = school.school_id order by building.building_id, exam_room.exam_room_id asc";
         $i = 1;
-
         if ($result = $conn->query($sql)) {
 
             $operation['operation'] = "success";  // query สำเร็จ
 
             while ($data = $result->fetch(PDO::FETCH_ASSOC)) {
 
-                $operation["body"][$i]['committee_id'] = $data['committee_id'];
-                $operation["body"][$i]['committee_prename'] = $data['committee_prename'];
-                $operation["body"][$i]['committee_firstname'] = $data['committee_firstname'];
-                $operation["body"][$i]['committee_lastname'] = $data['committee_lastname'];
-                $operation["body"][$i]['school_id'] = $data['school_id'];
+                $operation["body"][$i]['exam_room_id'] = $data['exam_room_id'];
+                $operation["body"][$i]['exam_room_name'] = $data['exam_room_name'];
+                $operation["body"][$i]['exam_room_capacity'] = $data['exam_room_capacity'];
+                $operation["body"][$i]['exam_room_committee1'] = $data['exam_room_committee1'];
+                $operation["body"][$i]['exam_room_committee2'] = $data['exam_room_committee2'];
+                $operation["body"][$i]['building_id'] = $data['building_id'];
                 $i++;
             }
         }
@@ -110,7 +118,7 @@ function _getRequest($input) {
 
 /*
  * Function _postRequest
- * Purpose: สร้างข้อมูลกรรมการ
+ * Purpose: สร้างข้อมูลอาคารใหม่
  */
 
 function _postRequest($input) {
@@ -121,25 +129,29 @@ function _postRequest($input) {
     $operation = array();
     $operation['operation'] = "fail";
 
-    $committee_prename= $input['committee_prename'];
-    $committee_firstname = $input['committee_firstname'];
-    $committee_lastname = $input['committee_lastname'];
-    $school_id = $input['school_id'];
+    $exam_room_name = $input['exam_room_name'];
+    $exam_room_capacity = $input['exam_room_capacity'];
+    $exam_room_committee1 = $input['exam_room_committee1'];
+    $exam_room_committee2 = $input['exam_room_committee2'];
+    $building_id = $input['building_id'];
+
 
     /*
-     * เตรียม SQL เพื่อเพิ่มข้อมูลกรรมการ
+     * เตรียม SQL เพื่อเพิ่มข้อมูลอาคารใหม่
      */
     
-    $sql = "insert into committee ("
-            . "committee_prename, "
-            . "committee_firstname, "
-            . "committee_lastname, "
-            . "school_id "
+    $sql = "insert into exam_room ("
+            . "exam_room_name, "
+            . "exam_room_capacity, "
+            . "exam_room_committee1, "
+            . "exam_room_committee2, "
+            . "building_id "
             . ") values("
-            . "'$committee_prename', "
-            . "'$committee_firstname', "
-            . "'$committee_lastname', "
-            . "'$school_id' "
+            . "'$exam_room_name', "
+            . "'$exam_room_capacity', "
+            . "'$exam_room_committee1', "
+            . "'$exam_room_committee2', "
+            . "'$building_id' "
             . ")";
     /*
      * Operate คำสั่งลงฐานข้อมูล
@@ -155,7 +167,7 @@ function _postRequest($input) {
 
 /*
  * Function _getRequest
- * Purpose: แก้ไขข้อมูลกรรมการ
+ * Purpose: แก้ไขข้อมูลอาคารเรียน
  */
 
 function _putRequest() {
@@ -167,21 +179,23 @@ function _putRequest() {
     $operation = array();
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
-        $committee_id = $input['id'];
-        $committee_prename = $input['committee_prename'];
-        $committee_firstname = $input['committee_firstname'];
-        $committee_lastname = $input['committee_lastname'];
-        $school_id = $input['school_id'];
+        $exam_room_id = $input['id'];
+        $exam_room_name = $input['exam_room_name'];
+        $exam_room_capacity = $input['exam_room_capacity'];
+        $exam_room_committee1 = $input['exam_room_committee1'];
+        $exam_room_committee2 = $input['exam_room_committee2'];
+        $building_id = $input['building_id'];
 
         /*
-         * เตรียม SQL เพื่อแก้ไขข้อมูลกรรมการ
+         * เตรียม SQL เพื่อแก้ไขข้ออาคาร
          */
-        $sql = "update committee set "
-                . "committee_prename = '$committee_prename', "
-                . "committee_firstname = '$committee_firstname', "
-                . "committee_lastname = '$committee_lastname', "
-                . "school_id = '$school_id' "
-                . "where committee_id = $committee_id";
+        $sql = "update exam_room set "
+                . "exam_room_name = '$exam_room_name', "
+                . "exam_room_capacity = '$exam_room_capacity', "
+                . "exam_room_committee1 = '$exam_room_committee1', "
+                . "exam_room_committee2 = '$exam_room_committee2', "
+                . "building_id = '$building_id' "
+                . "where exam_room_id = $exam_room_id";
         /*
          * Operate คำสั่งลงฐานข้อมูล
          */
@@ -195,7 +209,7 @@ function _putRequest() {
 
 /*
  * Function _getRequest
- * Purpose: เพื่อใช้ลบข้อมูลกรรมการ
+ * Purpose: เพื่อใช้ลบข้อมูลอาคาร
  */
 
 function _deleteRequest() {
@@ -209,10 +223,10 @@ function _deleteRequest() {
     $operation['operation'] = "fail";
     if (isset($input['id'])) {
         /*
-         * เตรียม SQL เพื่อลบข้อมูลกรรมการ
+         * เตรียม SQL เพื่อลบข้อมูลอาคาร
          */
-        $committee_id = $input['id'];
-        $sql = "delete from committee where committee_id = $committee_id";
+        $exam_room_id = $input['id'];
+        $sql = "delete from exam_room where exam_room_id = $exam_room_id";
 
         /*
          * Operate คำสั่งลงฐานข้อมูล

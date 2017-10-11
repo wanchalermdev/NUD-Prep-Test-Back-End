@@ -3,11 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/xampp/htdocs/NUDPrepTestBackEnd/user_account/UserAccountManagement.php</file>
-            <file>file:/C:/xampp/htdocs/NUDPrepTestBackEnd/authentication/AuthenticationRequestLogin.php</file>
-            <file>file:/C:/xampp/htdocs/NUDPrepTestBackEnd/exam_center/building/buildingModel.php</file>
-            <file>file:/C:/xampp/htdocs/NUDPrepTestBackEnd/index.php</file>
-            <file>file:/C:/xampp/htdocs/NUDPrepTestBackEnd/school/schoolManagement.php</file>
+            <file>file:/C:/xampp/htdocs/NUDPrepTestBackEnd/info.php</file>
+            <file>file:/C:/xampp/htdocs/NUDPrepTestBackEnd/exam_center/examCenterInfo.php</file>
+            <file>file:/C:/xampp/htdocs/NUDPrepTestBackEnd/exam_center/room/roomModel.php</file>
         </group>
     </open-files>
 </project-private>
